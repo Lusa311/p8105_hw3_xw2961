@@ -66,5 +66,19 @@ ggplot(merged_dataset, aes(x = education,y = age, fill = sex)) +
       panel.grid.major = element_blank(),                 # Remove major grid lines
       panel.grid.minor = element_blank())                 # Remove minor grid lines
 
+# Combine to total activity
+aggregate_dataset = merged_dataset %>%
+  mutate(total_activity_min = rowSums(select(., "min1":"min1440")))
+
+# Plot total activities against age
+total_activity_scatter_plot = 
+  aggregate_dataset %>%  
+  ggplot(aes(x = age, y = total_activity_min, color = sex)) + 
+  geom_point()+
+  ggtitle("Scatterplot of Age against Total Physical Activity in Minutes") + xlab("Age") + ylab("Total Minutes")+
+  geom_smooth()+
+  facet_grid( . ~ education )
+
+total_activity_scatter_plot
 ```
 
