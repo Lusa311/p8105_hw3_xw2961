@@ -75,10 +75,24 @@ total_activity_scatter_plot =
   aggregate_dataset %>%  
   ggplot(aes(x = age, y = total_activity_min, color = sex)) + 
   geom_point()+
-  ggtitle("Scatterplot of Age against Total Physical Activity in Minutes") + xlab("Age") + ylab("Total Minutes")+
+  ggtitle("Scatterplot of Age against Total Physical Activity in Minutes") + 
+  xlab("Age") + 
+  ylab("Total Minutes")+
   geom_smooth()+
   facet_grid( . ~ education )
 
 total_activity_scatter_plot
+
+# Plot 24-hour activity time courses for each education level 
+merged_dataset %>%
+  group_by(sex, education) %>% 
+  summarise(across(starts_with("min"), mean, na.rm = TRUE)) %>%
+  pivot_longer(cols = starts_with("min"), names_to = "minute", values_to = "mean_activity") %>%
+  ggplot(aes(x = minute, y = mean_activity, color = sex)) +
+  geom_point(alpha = 0.3) + 
+  geom_line() +
+  geom_smooth(se = FALSE) +
+  ggtitle("24-Hour Activity Time Course by Education Level") +
+  facet_grid(. ~ education) 
 ```
 
