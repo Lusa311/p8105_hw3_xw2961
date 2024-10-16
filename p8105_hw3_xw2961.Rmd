@@ -1,0 +1,70 @@
+---
+title: "p8105_hw3_xw2961"
+output: github_document
+date: "`Oct 16`"
+---
+
+#load packages
+```{r setup, include=FALSE}
+library(tidyverse)
+library(dplyr)
+library(readr)
+library(ggplot2)
+```
+
+### Problem 2
+```{r}
+# load, tidy, merge the dataset
+library(dplyr)
+library(readr)
+library(janitor)
+
+# dataset loading, tidy, merge
+demographic = read_csv("./data/nhanes_covar.csv") %>%
+  {colnames(.) <- as.character(.[4, ]); .} %>%  # Set 4th row as column names
+  slice(-c(1:4)) %>%                            # Remove the first four rows
+  janitor::clean_names() %>% 
+  filter(age >= 21) %>%                        
+  mutate(sex = recode(sex, "1" = "male", "2" = "female")) %>%  
+  mutate(education = recode(education,         
+                            "1" = "Less than high school", 
+                            "2" = "High school equivalent", 
+                            "3" = "More than high school")) %>% 
+  drop_na() %>% 
+  mutate(age = as.numeric(age)) %>% 
+  mutate(bmi = as.numeric(bmi))
+demographic
+  
+
+
+accelerometers = read_csv("./data/nhanes_accel.csv") %>% 
+  janitor::clean_names() %>% 
+  mutate(seqn=as.character(seqn))
+accelerometers
+
+merged_dataset = left_join(demographic, accelerometers, "seqn")
+merged_dataset
+
+
+# table for the number of men and women in each education category
+
+education_gender_count <- merged_dataset %>%
+  group_by(education, sex) %>%  # Group by education and sex
+  summarise(count = n())        # Count the number of occurrences in each group
+
+education_gender_count
+
+# a visualization of the age distributions for men and women in each education category
+ggplot(merged_dataset, aes(x = education,y = age, fill = sex)) +
+  geom_violin(trim = FALSE, width = 1, alpha = 0.6) +  # Widen violins and add transparency
+  geom_jitter(aes(color = sex), width = 0.1, alpha = 0.6) +  # Add jittered points for clarity
+  facet_wrap(~ sex) +                                       # Facet by sex
+  labs(title = "Age Distribution by Education Level and Sex",
+       x = "Education Level", y = "Age")+ 
+  theme_minimal() +                                         # Apply a clean theme
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),  # Rotate x-axis labels
+      panel.grid.major = element_blank(),                 # Remove major grid lines
+      panel.grid.minor = element_blank())                 # Remove minor grid lines
+
+```
+
