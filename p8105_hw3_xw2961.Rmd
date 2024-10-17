@@ -39,8 +39,10 @@ accelerometers
 
 merged_dataset = left_join(demographic, accelerometers, "seqn")
 merged_dataset
+```
 
 
+```{r}
 # table for the number of men and women in each education category
 
 education_gender_count <- merged_dataset %>%
@@ -49,7 +51,10 @@ education_gender_count <- merged_dataset %>%
   knitr::kable()
 
 education_gender_count
+```
+In less than high school and more than high school, the number of female and male is roughly equal. While in the high school equivalent category, there is much less femal than male. The number of people who have more than high school educational level is the most.
 
+```{r}
 # a visualization of the age distributions for men and women in each education category
 ggplot(merged_dataset, aes(x = education,y = age, fill = sex)) +
   geom_violin(trim = FALSE, width = 1, alpha = 0.6) +  
@@ -60,8 +65,14 @@ ggplot(merged_dataset, aes(x = education,y = age, fill = sex)) +
   theme_minimal() +                                         
   theme(axis.text.x = element_text(angle = 45, hjust = 1),  
       panel.grid.major = element_blank(),                 
-      panel.grid.minor = element_blank())                 
+      panel.grid.minor = element_blank())
+```
+We can notice from the more than high school education category,the people(both female and male) who have around 30 years old are the majority in this category. While for other two educational levels(high school euvalent and less than high school), older people tends to be the majority of people in those education categories.
 
+Comparing between male and female, the female with younger age is less than the male with younger age in the high school equivalent education category. In less than high school category, male shows two peaks(around 75 and 40 years old), while female only have one peak at 75 years old.
+
+
+```{r}
 # Combine to total activity
 aggregate_dataset = merged_dataset %>%
   mutate(total_activity_min = rowSums(select(., "min1":"min1440")))
@@ -78,20 +89,41 @@ total_activity_scatter_plot =
   facet_grid( . ~ education )
 
 total_activity_scatter_plot
+```
+All the graphs show the time for physical activity declines with ages, no matter what educational level and gender are.
 
+In both high school equivalent and more than high school education categories, females show generally higher time of physical activity than male. In the less than high school education level, female's time of physical activity is higher before 40 years old, but males overtake it after 40 years old.
+
+For high school equivalent education level, people have a peak of physical activity time at around 40 years old. For less than high school level, people have a peak of physical activity time at around 20 years old and recover (create a second peak) at around 60 years old.For More than high school, the overall changing in PA is flat.
+
+Among three different education categories, people with less than high school education have the overall highest PA time duration.
+
+```{r}
 # Plot 24-hour activity time courses for each education level 
 merged_dataset %>%
-  group_by(sex, education) %>% 
+  group_by(sex, education) %>%
   summarise(across(starts_with("min"), mean, na.rm = TRUE)) %>%
   pivot_longer(cols = starts_with("min"), names_to = "minute", values_to = "mean_activity") %>%
-  ggplot(aes(x = minute, y = mean_activity, color = sex)) +
-  geom_point(alpha = 0.3) + 
+  mutate(hour = as.numeric(gsub("min", "", minute)) / 60) %>% # Convert minutes to hours
+  ggplot(aes(x = hour, y = mean_activity, color = sex)) +
+  geom_point(alpha = 0.2) +
   geom_line() +
   geom_smooth(se = FALSE) +
+  scale_x_continuous(
+    breaks = seq(0, 24, by = 5) # Show time in hours, breaking at every 5 hours
+  ) +
   ggtitle("24-Hour Activity Time Course by Education Level") +
-  facet_grid(. ~ education) 
-```
+  facet_grid(. ~ education) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 0)) # Keep x-axis text horizontal for readability
 
+
+```
+All educational level show the similar pattern of physical activity in a day, showing that people declines in physical activity in first 5 hours of the day, and then couple with a strong increase from 5 hours to 13 hours(reach the peak), and then gradually decline after roughly 15 hours.
+
+Less than high school shows the overall highest mean physical activity
+
+Female in both high school equivalent and more than high school categories shows a higher overall physical activity.
 
 ### Question 3
 ```{r}
@@ -120,7 +152,10 @@ combined_data <- bind_rows(
   Jul_2024 %>% mutate(period = "Jul_2024")
 )
 combined_data
+```
 
+
+```{r}
 # creating the table for membership and time
 rides_table <- combined_data %>%
   group_by(period, member_casual) %>%  
@@ -128,7 +163,15 @@ rides_table <- combined_data %>%
   knitr::kable()
 
 rides_table
+```
+During July 2024, people with membership have the highest number of ride (36262), followed by people with membership during January 2024 and people with July 2020 with membership(N of rides: 16753 and 15411 respectively)
 
+The people with membership has much higher rides than people without membership.
+
+The number of rides generally increases through years for both casual and membership riders.
+
+
+```{r}
 #creating the table for the 5 most popular starting stations for July 2024
 top_stations_july_2024 <- combined_data %>%
   filter(period == "Jul_2024") %>% 
@@ -138,8 +181,10 @@ top_stations_july_2024 <- combined_data %>%
   slice_head(n = 5)  
 
 knitr::kable(top_stations_july_2024)
+```
 
 
+```{r}
 #creating the plot about median ride duration
 plot_data <- combined_data %>%
   separate(period, into = c("month", "year"), sep = "_") %>%
@@ -157,7 +202,12 @@ plot_data <- combined_data %>%
 
   
 plot_data
+```
+The median ride duration in 2020 is much higher than the median ride duration in 2024. The median ride duration in July in both year is much higher than that in January in both year.
 
+In 2020, there was significant increase in ride duration when the time is approaching to weekend for both January and July. While in 2024, the median ride duration dropped slightly during weekend.
+
+```{r}
 #creating the plot about data in 2024
 plot_data_2024 <- combined_data %>% 
   separate(period, into = c("month", "year"), sep = "_") %>%
@@ -173,5 +223,10 @@ plot_data_2024 <- combined_data %>%
 plot_data_2024
 
 ```
+Overall, the casual rider has slightly higher duration of ride than rider with membership. 
+
+The month does not influence on the duration of ride too much.
+
+The people using electric bike shows slightly shorter duration of ride than the people using classic bike.
 
 
