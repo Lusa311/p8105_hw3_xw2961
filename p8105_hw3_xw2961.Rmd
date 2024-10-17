@@ -14,11 +14,6 @@ library(ggplot2)
 
 ### Problem 2
 ```{r}
-# load, tidy, merge the dataset
-library(dplyr)
-library(readr)
-library(janitor)
-
 # dataset loading, tidy, merge
 demographic = read_csv("./data/nhanes_covar.csv") %>%
   {colnames(.) <- as.character(.[4, ]); .} %>%  # Set 4th row as column names
@@ -50,21 +45,22 @@ merged_dataset
 
 education_gender_count <- merged_dataset %>%
   group_by(education, sex) %>%  # Group by education and sex
-  summarise(count = n())        # Count the number of occurrences in each group
+  summarise(count = n()) %>% # Count the number of occurrences in each group
+  knitr::kable()
 
 education_gender_count
 
 # a visualization of the age distributions for men and women in each education category
 ggplot(merged_dataset, aes(x = education,y = age, fill = sex)) +
-  geom_violin(trim = FALSE, width = 1, alpha = 0.6) +  # Widen violins and add transparency
-  geom_jitter(aes(color = sex), width = 0.1, alpha = 0.6) +  # Add jittered points for clarity
-  facet_wrap(~ sex) +                                       # Facet by sex
+  geom_violin(trim = FALSE, width = 1, alpha = 0.6) +  
+  geom_jitter(aes(color = sex), width = 0.1, alpha = 0.6) +  
+  facet_wrap(~ sex) +                                       
   labs(title = "Age Distribution by Education Level and Sex",
        x = "Education Level", y = "Age")+ 
-  theme_minimal() +                                         # Apply a clean theme
-  theme(axis.text.x = element_text(angle = 45, hjust = 1),  # Rotate x-axis labels
-      panel.grid.major = element_blank(),                 # Remove major grid lines
-      panel.grid.minor = element_blank())                 # Remove minor grid lines
+  theme_minimal() +                                         
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),  
+      panel.grid.major = element_blank(),                 
+      panel.grid.minor = element_blank())                 
 
 # Combine to total activity
 aggregate_dataset = merged_dataset %>%
@@ -95,4 +91,43 @@ merged_dataset %>%
   ggtitle("24-Hour Activity Time Course by Education Level") +
   facet_grid(. ~ education) 
 ```
+
+
+### Question 3
+```{r}
+# Importing datasets
+Jan_2020 = 
+  read_csv("./data/Jan 2020 Citi.csv") %>% 
+  janitor::clean_names()
+
+Jul_2020 = 
+  read_csv("./data/July 2020 Citi.csv") %>% 
+  janitor::clean_names()
+
+Jan_2024 = 
+  read_csv("./data/Jan 2024 Citi.csv") %>% 
+  janitor::clean_names()
+
+Jul_2024 = 
+  read_csv("./data/July 2024 Citi.csv") %>% 
+  janitor::clean_names()
+
+# Combining and cleaning datasets
+combined_data <- bind_rows(
+  Jan_2020 %>% mutate(period = "Jan_2020"),
+  Jul_2020 %>% mutate(period = "Jul_2020"),
+  Jan_2024 %>% mutate(period = "Jan_2024"),
+  Jul_2024 %>% mutate(period = "Jul_2024")
+)
+combined_data
+
+# creating the table
+rides_table <- combined_data %>%
+  group_by(period, member_casual) %>%  
+  summarise(count = n()) %>% 
+  knitr::kable()
+
+rides_table
+```
+
 
