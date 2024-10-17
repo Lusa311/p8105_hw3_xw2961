@@ -121,13 +121,24 @@ combined_data <- bind_rows(
 )
 combined_data
 
-# creating the table
+# creating the table for membership and time
 rides_table <- combined_data %>%
   group_by(period, member_casual) %>%  
   summarise(count = n()) %>% 
   knitr::kable()
 
 rides_table
+
+#creating the table for the 5 most popular starting stations for July 2024
+top_stations_july_2024 <- combined_data %>%
+  filter(period == "Jul_2024") %>% 
+  group_by(start_station_name) %>% 
+  summarise(total_rides = n(), .groups = "drop") %>%  
+  arrange(desc(total_rides)) %>%  
+  slice_head(n = 5)  
+
+knitr::kable(top_stations_july_2024)
+
 ```
 
 
