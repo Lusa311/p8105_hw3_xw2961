@@ -139,6 +139,26 @@ top_stations_july_2024 <- combined_data %>%
 
 knitr::kable(top_stations_july_2024)
 
+
+#creating the plot about median ride duration
+plot_data <- combined_data %>%
+  separate(period, into = c("month", "year"), sep = "_") %>%
+  mutate(weekdays = factor(weekdays, levels = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"))) %>%
+  group_by(weekdays, month, year) %>% 
+  summarise(median_duration = median(duration, na.rm = TRUE), .groups = "drop") %>% 
+  ggplot(aes(x = weekdays, y = median_duration, color = year)) +
+  geom_line(aes(group = year)) +
+  facet_grid(. ~ month) +
+  labs(
+    title = "Effects of Day of the Week, Month, and Year on Median Ride Duration",
+    x = "Day of the Week",
+    y = "Median Ride Duration (minutes)") +
+    theme(axis.text.x = element_text(angle = 45))
+
+  
+plot_data
+
+
 ```
 
 
