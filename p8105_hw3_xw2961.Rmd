@@ -5,7 +5,7 @@ date: "`Oct 16`"
 ---
 
 #load packages
-```{r setup, include=FALSE}
+```{r}
 library(tidyverse)
 library(dplyr)
 library(readr)
